@@ -6,7 +6,7 @@ var timezones = TimeZoneInfo.GetSystemTimeZones().Where(x =>
     return  x.Id.Contains("jayapura", StringComparison.OrdinalIgnoreCase)
     || x.Id.Contains("makassar", StringComparison.OrdinalIgnoreCase) 
     || x.Id.Contains("jakarta", StringComparison.OrdinalIgnoreCase) 
-    //|| x.DisplayName.Contains("indonesia");
+    || x.DisplayName.Contains("japan", StringComparison.OrdinalIgnoreCase);
     ;
 });
 
