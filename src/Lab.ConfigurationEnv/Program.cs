@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Lab.ConfigurationEnv;
 using Lab.ConfigurationEnv.Settings;
+using Lab.ConfigurationEnv.Settings.Extensions;
 using Lab.ConfigurationEnv.Settings.Validations;
 using Microsoft.Extensions.Options;
 
@@ -17,28 +18,17 @@ ILogger logger = builder.Services.BuildServiceProvider().GetRequiredService<ILog
 // Bind configuration
 logger.LogDebug("Reading configuration");
 
+
+// 1. Configure MicroserviceSettings from appsettings.json
+//builder.Services.Configure<MicroserviceSettings>(builder.Configuration.GetSection("MicroserviceSettings"));
 builder.Services
   .AddOptions<MicroserviceSettings>()
   .Bind(builder.Configuration.GetSection("Microservice"))
   .ValidateDataAnnotations();
 
-// Validate configuration
-var validationResults = builder.Services.BuildServiceProvider()
-    .GetRequiredService<IOptions<MicroserviceSettings>>()
-    .Value
-    .Validate();
 
-if (validationResults.Count > 0)
-{
-    logger.LogError("Configuration validation failed:");
-    foreach (var result in validationResults)
-    {
-        Console.WriteLine($" - {result.ErrorMessage}");
-        logger.LogError($" - {result.ErrorMessage}");
-    }
-
-    throw new ValidationException("Invalid configuration");
-}
+// 2. Validate the configuration before the app runs using a scoped service method
+builder.Services.AddSingleton<IStartupFilter>(new ConfigurationValidationStartupFilter());
 
 
 
@@ -71,6 +61,7 @@ app.MapGet("/get-config", (MyService service) =>
 
 app.Run();
 
+
 namespace Lab.ConfigurationEnv 
 {
     public class MyService
@@ -94,3 +85,4 @@ namespace Lab.ConfigurationEnv
         }
     }
 }
+
